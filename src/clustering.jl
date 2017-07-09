@@ -80,7 +80,7 @@ function dpclustgibbs(y, N;
     wtsout, clonefreq = summariseoutput(dp, wts, iter; burninstart = burninstart, cutoff = cutoff)
 
     sortind = sortperm(clonefreq)
-    return DPresults(DF, wts, length(wtsout), wtsout[sortind], clonefreq[sortind], dp)
+    return DPresults(DF, wts, length(wtsout), wtsout[sortind], clonefreq[sortind], dp, TargetData(y, N, mutCopyNum))
 end
 
 function allocate(V, pi, obsy, obsN, currk, jvec)

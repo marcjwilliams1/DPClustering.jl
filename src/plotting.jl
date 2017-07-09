@@ -7,7 +7,7 @@ function plotresults(dp)
   Theme(default_color = RGBA(0.325, 0.525, 0.608),
   lowlight_color=c->RGBA{Float32}(c.r, c.g, c.b, 0.5)))
   l2 = layer(DF, x = :VAF, Geom.histogram(bincount=100, density = true),
-  Theme(default_color = RGBA(0.5, 0.5, 0.5, 0.8)), bar_spacing = -0.05)
+  Theme(default_color = RGBA(0.5, 0.5, 0.5, 0.8)))
 
   myplot = plot(l1, l2,
   Guide.xlabel("VAF"),
