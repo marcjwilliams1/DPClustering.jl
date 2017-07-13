@@ -77,10 +77,10 @@ function dpclustgibbs(y, N;
     dp = DPout(S, V, π, α)
 
     DF, wts = getdensity(dp, iter; burninstart = burninstart, bw = bw, maxx = maxx)
-    wtsout, clonefreq = summariseoutput(dp, wts, iter; burninstart = burninstart, cutoff = cutoff)
+    wtsout, clonefreq, allwts, allfreq = summariseoutput(dp, wts, iter; burninstart = burninstart, cutoff = cutoff)
 
     sortind = sortperm(clonefreq)
-    return DPresults(DF, wts, length(wtsout), wtsout[sortind], clonefreq[sortind], dp, TargetData(y, N, mutCopyNum))
+    return DPresults(DF, wts, length(wtsout), wtsout[sortind], clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum))
 end
 
 function allocate(V, pi, obsy, obsN, currk, jvec)
@@ -131,5 +131,10 @@ function summariseoutput(dp, wts, iter; burninstart = 1000, cutoff = 0.05)
     clonefrequency = mean(dp.π[burninstart:iter, :], 1)
     largeclonefrequency = clonefrequency[meanwts.>cutoff]
 
-    return clonewts, largeclonefrequency
+    clonefrequency = clonefrequency[:]
+    meanwts = meanwts[:]
+
+    sortind = sortperm(clonefrequency)
+
+    return clonewts, largeclonefrequency, meanwts[sortind], clonefrequency[sortind]
 end

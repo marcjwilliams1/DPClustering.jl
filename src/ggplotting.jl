@@ -16,6 +16,8 @@ function ggplot(dp, directory)
 
   save_plot(filename = directory, plot = g)
 
+  g
+
   """
 
 end

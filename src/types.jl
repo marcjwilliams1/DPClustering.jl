@@ -6,6 +6,7 @@ type DPout
 end
 
 type TargetData
+
     y::Array{Int64, 1}
     N::Array{Int64, 1}
     VAF::Array{Float64, 1}
@@ -21,6 +22,8 @@ type DPresults
     nclones
     cloneweights
     clonefrequencies
+    allcloneweights
+    allclonefrequencies
     posterior::DPout
     data::TargetData
 end
