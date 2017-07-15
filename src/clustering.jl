@@ -7,7 +7,8 @@ function dpclustgibbs(y, N;
     burninstart = round(Int64, iter/2),
     bw = 0.01,
     maxx = 0.7,
-    cutoff = 0.05)
+    cutoff = 0.05,
+    verbose = true)
 
     # y is a vector of the number of reads reporting each variant
     # N is a vector of the number of reads in total across the base in question (in the same order as Y obviously!)
@@ -43,6 +44,10 @@ function dpclustgibbs(y, N;
     α[1] = 1.0
     V[1, 1:(C - 1)] = 0.5
 
+    if verbose == true
+      p = Progress(iter, 1, "Gibbs sampling progress: ", 30)
+    end
+
     for m in 2:iter
 
         @inbounds @simd for k in 1:nummuts
@@ -75,6 +80,10 @@ function dpclustgibbs(y, N;
         end
 
         α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log(1-V[m, 1:(C-1)])))))
+
+        if verbose == true
+          next!(p)
+        end
 
     end
 
