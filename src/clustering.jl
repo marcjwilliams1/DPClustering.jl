@@ -15,6 +15,8 @@ function dpclustgibbs(y, N;
     # C is the maximum number of clusters in the Dirichlet process
     # iter is the number of iterations of the Gibbs sampler
 
+    sum(y .== 0) || error("Some mutations have VAF = 0.0, make sure these mutations are removed before clsutering")
+
     # Hyperparameters for alpha
     A = B = 0.01
 
