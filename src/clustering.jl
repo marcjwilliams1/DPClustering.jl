@@ -71,14 +71,7 @@ function dpclustgibbs(y, N;
           αp = sum(y[S[m, :] .== c])
           βp = 1./sum(countsPerCopyNum[S[m, :] .== c])
           π[m, c] = rand(Gamma(αp, βp))
-            mutBurdens[m, c, :] = π[m, c]
-        end
-
-        rate2 = 1/(B - sum(log(1-V[m, 1:(C-1)])))
-        if rate2 == 0.0
-          println(V[m, 1:(C-1)])
-          println(V[m, :])
-          println(B)
+          mutBurdens[m, c, :] = π[m, c]
         end
 
         α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log(1-V[m, 1:(C-1)])))))
