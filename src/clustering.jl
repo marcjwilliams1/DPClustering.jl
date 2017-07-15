@@ -43,7 +43,7 @@ function dpclustgibbs(y, N;
     α[1] = 1.0
     V[1, 1:(C - 1)] = 0.5
 
-    @inbounds @showprogress for m in 2:iter
+    for m in 2:iter
 
         @inbounds @simd for k in 1:nummuts
             PrS[k, 1] = log(V[m .- 1, 1]) .+ (y[k] .* log(mutBurdens[m-1, 1, k])) .+
@@ -59,6 +59,8 @@ function dpclustgibbs(y, N;
 
         # Update stick-breaking weights
         V[m, 1:(C-1)] = map(h -> rand(Beta(1+sum(S[m, :] .== h), α[m - 1] + sum(S[m, :] .> h))), 1:(C-1))
+        #stop one stick taking all weight
+        V[m, [V[m, 1:(C-1)] .== 1.0; false]] = 0.9999
 
         countsPerCopyNum = N
 
@@ -66,8 +68,17 @@ function dpclustgibbs(y, N;
 
         mutBurdens[m, :, :] = mutBurdens[m - 1, :, :]
         @inbounds @simd for c in unique(S[m, :])
-            π[m, c] = rand(Gamma(sum(y[S[m, :] .== c]), 1./sum(countsPerCopyNum[S[m, :] .== c])))
+          αp = sum(y[S[m, :] .== c])
+          βp = 1./sum(countsPerCopyNum[S[m, :] .== c])
+          π[m, c] = rand(Gamma(αp, βp))
             mutBurdens[m, c, :] = π[m, c]
+        end
+
+        rate2 = 1/(B - sum(log(1-V[m, 1:(C-1)])))
+        if rate2 == 0.0
+          println(V[m, 1:(C-1)])
+          println(V[m, :])
+          println(B)
         end
 
         α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log(1-V[m, 1:(C-1)])))))
