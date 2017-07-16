@@ -36,7 +36,7 @@ function dpclustgibbs(y, N;
     upper = maximum(mutCopyNum)
     difference = upper - lower
     lower = maximum([0.0001, lower - difference/10])
-    upper = upper + difference/10
+    upper = minimum([upper + difference/10, 0.999])
     # randomise starting positions of clusters
     π[1, :] = rand(Uniform(lower, upper), C)
     for c in 1:C
@@ -51,12 +51,10 @@ function dpclustgibbs(y, N;
     end
 
     for m in 2:iter
-
         @inbounds @simd for k in 1:nummuts
             PrS[k, 1] = log(V[m .- 1, 1]) .+ (y[k] .* log(mutBurdens[m-1, 1, k])) .+
             (N[k] .- y[k]) .* log(1 .- mutBurdens[m - 1, 1, k])
             PrS[k, 2:C] = allocate(V[m-1, :], mutBurdens[m-1, :, k], y, N, k, 2:C)
-
             PrS[k, :] = PrS[k, :] .- maximum(PrS[k, :])
             PrS[k, :] = exp(PrS[k, :])
             PrS[k, :] = PrS[k, :] ./ sum(PrS[k, :])
@@ -77,7 +75,7 @@ function dpclustgibbs(y, N;
         @inbounds @simd for c in unique(S[m, :])
           αp = sum(y[S[m, :] .== c])
           βp = 1./sum(countsPerCopyNum[S[m, :] .== c])
-          π[m, c] = rand(Gamma(αp, βp))
+          π[m, c] = minimum([rand(Gamma(αp, βp)), 0.999])
           mutBurdens[m, c, :] = π[m, c]
         end
 
@@ -100,6 +98,11 @@ end
 
 function allocate(V, pi, obsy, obsN, currk, jvec)
     out = zeros(length(jvec))
+
+    #println(V)
+    #println(pi)
+    #println(obsy)
+    #println(obsN)
     @inbounds @simd for j in jvec
         out[j-1] = log(V[j]) .+ sum(log(1 .- V[1:(j-1)])) .+ obsy[currk] .*log(pi[j]) .+ (obsN[currk] .- obsy[currk]) .* log(1-pi[j])
     end
