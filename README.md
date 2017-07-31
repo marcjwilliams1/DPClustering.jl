@@ -8,7 +8,7 @@ Package is written in the [Julia](https://julialang.org/) programming language, 
 ## Clustering
 Clustering is invoked using the ```dpclustgibbs``` function which takes 2 vectors of equal size: y - the number of reads reporting the mutation and N - the depth of coverage at that locus. With these, clustering can be performed and the function will return a dpclustgibbs type. There are a number of optional arguments which are all set to reasonable defaults, you may want to change the number of iterations or set verbose to false. the default is to show a log of the time taken in the gibbs sampler.
 
-````
+```
 dp = dpclustgibbs(y, N, iterations = 2000, verbose = false);
 ```
 
