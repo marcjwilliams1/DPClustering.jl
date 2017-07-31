@@ -10,15 +10,11 @@ function dpclustgibbs(y, N;
     cutoff = 0.05,
     verbose = true)
 
-    # y is a vector of the number of reads reporting each variant
-    # N is a vector of the number of reads in total across the base in question (in the same order as Y obviously!)
-    # C is the maximum number of clusters in the Dirichlet process
-    # iter is the number of iterations of the Gibbs sampler
-
-    sum(y .== 0) == 0 || error("Some mutations have VAF = 0.0, make sure these mutations are removed before clsutering")
+    sum(y .== 0) == 0 || error("Some mutations have VAF = 0.0, make sure these mutations are removed before clustering")
 
     # Hyperparameters for alpha
-    A = B = 0.01
+    A = 0.01
+    B = 0.01
 
     nummuts = length(y)
 
@@ -69,8 +65,6 @@ function dpclustgibbs(y, N;
 
         countsPerCopyNum = N
 
-        #π[m, :] = rand(Uniform(lower, upper), C)
-
         mutBurdens[m, :, :] = mutBurdens[m - 1, :, :]
         @inbounds @simd for c in unique(S[m, :])
           αp = sum(y[S[m, :] .== c])
@@ -97,12 +91,9 @@ function dpclustgibbs(y, N;
 end
 
 function allocate(V, pi, obsy, obsN, currk, jvec)
+
     out = zeros(length(jvec))
 
-    #println(V)
-    #println(pi)
-    #println(obsy)
-    #println(obsN)
     @inbounds @simd for j in jvec
         out[j-1] = log(V[j]) .+ sum(log(1 .- V[1:(j-1)])) .+ obsy[currk] .*log(pi[j]) .+ (obsN[currk] .- obsy[currk]) .* log(1-pi[j])
     end
