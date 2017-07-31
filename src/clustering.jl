@@ -2,9 +2,9 @@ function dpclustgibbs(y, N;
     totalCopyNumber = ones(length(y)),
     cellularity = 1,
     normalCopyNumber = 2 * ones(length(y)),
-    iter = 1000,
+    iterations = 1000,
     C = 30,
-    burninstart = round(Int64, iter/2),
+    burninstart = round(Int64, iterations/2),
     bw = 0.01,
     maxx = 0.7,
     cutoff = 0.05,
@@ -18,13 +18,13 @@ function dpclustgibbs(y, N;
 
     nummuts = length(y)
 
-    # Set up data formats for recording iterations
-    π = zeros(iter, C)
-    V = ones(iter, C)
-    S = zeros(Int64, iter, nummuts)
+    # Set up data formats for recording iterationsations
+    π = zeros(iterations, C)
+    V = ones(iterations, C)
+    S = zeros(Int64, iterations, nummuts)
     PrS = zeros(nummuts, C)
-    α = zeros(iter)
-    mutBurdens = zeros(iter, C, nummuts)
+    α = zeros(iterations)
+    mutBurdens = zeros(iterations, C, nummuts)
 
     mutCopyNum = y ./ N
 
@@ -43,10 +43,10 @@ function dpclustgibbs(y, N;
     V[1, 1:(C - 1)] = 0.5
 
     if verbose == true
-      p = Progress(iter, 1, "Gibbs sampling progress: ", 30)
+      p = Progress(iterations, 1, "Gibbs sampling progress: ", 30)
     end
 
-    for m in 2:iter
+    for m in 2:iterations
         @inbounds @simd for k in 1:nummuts
             PrS[k, 1] = log(V[m .- 1, 1]) .+ (y[k] .* log(mutBurdens[m-1, 1, k])) .+
             (N[k] .- y[k]) .* log(1 .- mutBurdens[m - 1, 1, k])
@@ -83,8 +83,8 @@ function dpclustgibbs(y, N;
 
     dp = DPout(S, V, π, α)
 
-    DF, wts = getdensity(dp, iter; burninstart = burninstart, bw = bw, maxx = maxx)
-    wtsout, clonefreq, allwts, allfreq = summariseoutput(dp, wts, iter; burninstart = burninstart, cutoff = cutoff)
+    DF, wts = getdensity(dp, iterations; burninstart = burninstart, bw = bw, maxx = maxx)
+    wtsout, clonefreq, allwts, allfreq = summariseoutput(dp, wts, iterations; burninstart = burninstart, cutoff = cutoff)
 
     sortind = sortperm(clonefreq)
     return DPresults(DF, wts, length(wtsout), wtsout[sortind], clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum))
@@ -101,7 +101,7 @@ function allocate(V, pi, obsy, obsN, currk, jvec)
     return out
 end
 
-function getdensity(dp, iter; burninstart = 500, bw = 1.0, maxx = 0.5)
+function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxx = 0.5)
 
     wts = zeros( size(dp.V)[1], size(dp.V)[2]);
     wts[:, 1] = dp.V[:, 1]
@@ -112,12 +112,12 @@ function getdensity(dp, iter; burninstart = 500, bw = 1.0, maxx = 0.5)
 
     end
 
-    postints = zeros(512, iter -  burninstart + 1)
+    postints = zeros(512, iterations -  burninstart + 1)
 
     xx = kde(dp.π[burninstart - 1, :], weights = wts[burninstart, :]./(sum(wts[burninstart, :])),
                 npoints = 512, boundary = (0, maxx), bandwidth = bw).x
 
-    for i in burninstart:iter
+    for i in burninstart:iterations
         postints[:, i - burninstart + 1] = kde(dp.π[i - 1, :], weights = wts[i, :]./(sum(wts[i, :])),
         npoints = 512, boundary = (0, maxx), bandwidth = bw).density
     end
@@ -131,13 +131,13 @@ function getdensity(dp, iter; burninstart = 500, bw = 1.0, maxx = 0.5)
     return DF, wts
 end
 
-function summariseoutput(dp, wts, iter; burninstart = 1000, cutoff = 0.05)
+function summariseoutput(dp, wts, iterations; burninstart = 1000, cutoff = 0.05)
 
-    postwts = wts[burninstart:iter, :]
+    postwts = wts[burninstart:iterations, :]
     meanwts = mean(postwts, 1)
     clonewts = meanwts[meanwts.>cutoff]
 
-    clonefrequency = mean(dp.π[burninstart:iter, :], 1)
+    clonefrequency = mean(dp.π[burninstart:iterations, :], 1)
     largeclonefrequency = clonefrequency[meanwts.>cutoff]
 
     clonefrequency = clonefrequency[:]
