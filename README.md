@@ -28,6 +28,7 @@ At the moment, clustering will only work with single samples and mutations in co
 ## Example
 There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. We'll use the Gadfly package to save a plot.
 ```
+using DPclustering
 using Gadfly
 data = readcsv("example/data.csv", header = true)
 y = data[1][:, 1]
@@ -36,10 +37,10 @@ N = data[1][:, 2]
 out = dpclustgibbs(y, N)
 show(out)
 myplot = plotresults(out)
-draw(PDF("example/example.pdf", 15cm, 10cm), myplot)
+draw(PNG("example/example.png", 15cm, 10cm), myplot)
 ```
 
-![plot](/example/example.pdf)
+![plot](/example/example.png)
 
 
 ## Acknowledgments
