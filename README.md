@@ -9,7 +9,7 @@ To download this package use the ```Pkg.clone``` function as below, which will d
 ```
 Pkg.clone("https://github.com/marcjwilliams1/DPclustering.jl")
 ```
-To correctly calculate the probability density requires a weighted kernel density estimator which is only available in the latest version of ```KernelDensity.jl```. To update the version to the latest one use the following command once you have cloned this package.
+To correctly calculate the probability density requires a weighted kernel density estimator which is only available in the latest version of ```KernelDensity.jl```. To update the version to the latest one use the following command once you have cloned the ```DPclustering``` package.
 ```
 Pkg.checkout("KernelDensity")
 ```
