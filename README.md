@@ -23,5 +23,24 @@ dp = dpclustgibbs(y, N, iterations = 2000, verbose = false);
 
 You can then summarise and plot the output using ```show(dp)``` and ```plotresults(dp)```.
 
+At the moment, clustering will only work with single samples and mutations in copy neutral regions. So the input mutations should either be filtered for copy number alterations or corrected for copy number before inputting.
+
+## Example
+There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. We'll use the Gadfly package to save a plot.
+```
+using Gadfly
+data = readcsv("example/data.csv", header = true)
+y = data[1][:, 1]
+N = data[1][:, 2]
+
+out = dpclustgibbs(y, N)
+show(out)
+myplot = plotresults(out)
+draw(PDF("example/example.pdf", 15cm, 10cm), myplot)
+```
+
+![plot](/example/example.pdf)
+
+
 ## Acknowledgments
 The model used in the Gibbs sampler is as described in Nik-Zainal et al. Bugs code provided in the supplementary information of this publication was taken as inspiration, as was code available from the Peter van Loo and David Wedge groups (eg: https://github.com/Wedge-Oxford/dpclust_docker).

@@ -13,7 +13,7 @@ Perform dirichlet clustering on the variant allele frequency distribution of can
 - `verbose = true`: Show progress of gibbs sampling with `ProgressMeter` package
 ...
 """
-function dpclustgibbs(y::Array{Real, 1}, N::Array{Real, 1};
+function dpclustgibbs(y, N;
     iterations = 1000,
     C = 30, #max number of clusters
     burninstart = round(Int64, iterations/2),
