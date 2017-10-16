@@ -1,6 +1,7 @@
 """
     dpclustgibbs(y::Array{Real, 1}, N::Array{Real, 1}; <keyword arguments>)
 Perform dirichlet clustering on the variant allele frequency distribution of cancer sequencing data and find the number of clusters that the data supports, y is a vector of the number of reads reporting each mutant, N is the total depth at each locus.
+
 ...
 ## Arguments
 - `iterations = 1000`: number of iterations of the gibbs samples
@@ -10,6 +11,8 @@ Perform dirichlet clustering on the variant allele frequency distribution of can
 - `maxx = 0.7`:
 - `cutoffweight = 0.05`: Minimum weight to be called a cluster
 - `verbose = true`: Show progress of gibbs sampling with `ProgressMeter` package
+- `A = 0.01`: Hyperparameter for α, see Nik-Zainal et al
+- `B = 0.01`: Hyperparameter for α, see Nik-Zainal et al
 ...
 """
 function dpclustgibbs(y, N;
@@ -19,16 +22,15 @@ function dpclustgibbs(y, N;
     bw = 0.01, # bandwidth of density estimation
     maxx = 0.7,
     cutoffweight = 0.05, #minimum weight to be called a cluster
-    verbose = true)
+    verbose = true,
+    A = 0.01, # Hyperparameters for alpha
+    B = 0.01 # Hyperparameters for alpha
+    )
 
     sum(y .== 0) == 0 || error("Some mutations have VAF = 0.0, make sure these mutations are removed before clustering")
 
     totalCopyNumber = ones(length(y))
     normalCopyNumber = 2 * ones(length(y))
-
-    # Hyperparameters for alpha, same as Nik-Zainal et al
-    A = 0.01
-    B = 0.01
 
     nummuts = length(y)
 
