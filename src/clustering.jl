@@ -1,4 +1,3 @@
-
 """
     dpclustgibbs(y::Array{Real, 1}, N::Array{Real, 1}; <keyword arguments>)
 Perform dirichlet clustering on the variant allele frequency distribution of cancer sequencing data and find the number of clusters that the data supports, y is a vector of the number of reads reporting each mutant, N is the total depth at each locus.
@@ -64,11 +63,11 @@ function dpclustgibbs(y, N;
     for m in 2:iterations
         @inbounds @simd for k in 1:nummuts
             #Binomial log-likelihood
-            PrS[k, 1] = log(V[m .- 1, 1]) .+ (y[k] .* log(mutBurdens[m-1, 1, k])) .+
-            (N[k] .- y[k]) .* log(1 .- mutBurdens[m - 1, 1, k])
+            PrS[k, 1] = log.(V[m .- 1, 1]) .+ (y[k] .* log.(mutBurdens[m-1, 1, k])) .+
+            (N[k] .- y[k]) .* log.(1 .- mutBurdens[m - 1, 1, k])
             PrS[k, 2:C] = allocate(V[m-1, :], mutBurdens[m-1, :, k], y, N, k, 2:C)
             PrS[k, :] = PrS[k, :] .- maximum(PrS[k, :])
-            PrS[k, :] = exp(PrS[k, :])
+            PrS[k, :] = exp.(PrS[k, :])
             PrS[k, :] = PrS[k, :] ./ sum(PrS[k, :])
         end
 
@@ -89,7 +88,7 @@ function dpclustgibbs(y, N;
           mutBurdens[m, c, :] = π[m, c]
         end
 
-        α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log(1-V[m, 1:(C-1)])))))
+        α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log.(1-V[m, 1:(C-1)])))))
 
         if verbose == true
           next!(p)
@@ -111,7 +110,7 @@ function allocate(V, pi, obsy, obsN, currk, jvec)
     out = zeros(length(jvec))
 
     @inbounds @simd for j in jvec
-        out[j-1] = log(V[j]) .+ sum(log(1 .- V[1:(j-1)])) .+ obsy[currk] .*log(pi[j]) .+ (obsN[currk] .- obsy[currk]) .* log(1-pi[j])
+        out[j-1] = log.(V[j]) .+ sum(log.(1 .- V[1:(j-1)])) .+ obsy[currk] .*log.(pi[j]) .+ (obsN[currk] .- obsy[currk]) .* log.(1-pi[j])
     end
 
     return out

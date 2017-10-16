@@ -5,7 +5,7 @@ using RCall
 using DataFrames
 using ProgressMeter
 using KernelDensity
-using CancerSeqSim
+#using CancerSeqSim
 using Gadfly
 using Distributions
 using Colors
