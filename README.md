@@ -1,5 +1,10 @@
 # DPclustering
 
+[![Build Status](https://travis-ci.org/marcjwilliams1/DPclustering.jl.svg?branch=master)](https://travis-ci.org/marcjwilliams1/DPclustering.jl)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/marcjwilliams1/DPclustering.jl?branch=master&svg=true)](https://ci.appveyor.com/project/marcjwilliams1/DPclustering-jl/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/marcjwilliams1/DPclustering.jl/badge.svg?branch=master)](https://coveralls.io/github/marcjwilliams1/DPclustering.jl?branch=master)
+[![codecov.io](http://codecov.io/github/marcjwilliams1/DPclustering.jl/coverage.svg?branch=master)](http://codecov.io/github/marcjwilliams1/DPclustering.jl?branch=master)
+
 Perform Dirichlet clustering on Varaint Allele Frequncies (VAFs) from sequencing data of cancers a la Nik-Zainal et al.
 
 ## Getting started
