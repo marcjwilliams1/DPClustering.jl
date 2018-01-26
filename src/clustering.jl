@@ -35,14 +35,16 @@ function dpclustgibbs(y, N;
     nummuts = length(y)
 
     # Set up arrays and matrices for recording samples
-    π = zeros(iterations, C)
-    V = ones(iterations, C)
+    π = zeros(Float64, iterations, C)
+    V = ones(Float64, iterations, C)
     S = zeros(Int64, iterations, nummuts)
-    PrS = zeros(nummuts, C)
-    α = zeros(iterations)
-    mutBurdens = zeros(iterations, C, nummuts)
+    PrS = zeros(Float64, nummuts, C)
+    α = zeros(Float64, iterations)
+    mutBurdens = zeros(Float64, iterations, C, nummuts)
 
     mutCopyNum = y ./ N
+    y = map(Float64, y)
+    N = map(Float64, N)
 
     lower = minimum(mutCopyNum)
     upper = maximum(mutCopyNum)
@@ -63,29 +65,30 @@ function dpclustgibbs(y, N;
     end
 
     for m in 2:iterations
-        @inbounds @simd for k in 1:nummuts
+        for k in 1:nummuts
             #Binomial log-likelihood
             PrS[k, 1] = log.(V[m .- 1, 1]) .+ (y[k] .* log.(mutBurdens[m-1, 1, k])) .+
             (N[k] .- y[k]) .* log.(1 .- mutBurdens[m - 1, 1, k])
-            PrS[k, 2:C] = allocate(V[m-1, :], mutBurdens[m-1, :, k], y, N, k, 2:C)
-            PrS[k, :] = PrS[k, :] .- maximum(PrS[k, :])
-            PrS[k, :] = exp.(PrS[k, :])
-            PrS[k, :] = PrS[k, :] ./ sum(PrS[k, :])
+            allocate!(PrS, V, mutBurdens, y, N, k, C, m)
+            takemax!(PrS, k, C)
+            exp!(PrS, k, C)
+            normalize!(PrS, k, C)
         end
 
-        S[m, :] = map(k -> sum(rand(Multinomial(1, PrS[k, :])) .* collect(1:length(PrS[k, :]))), 1:nummuts)
+        multinomsample!(S, PrS, nummuts, m, C)
 
         # Update stick-breaking weights
-        V[m, 1:(C-1)] = map(h -> rand(Beta(1+sum(S[m, :] .== h), α[m - 1] + sum(S[m, :] .> h))), 1:(C-1))
+        updatestick!(V, S, α, C, m)
 
         V[m, [V[m, 1:(C-1)] .== 1.0; false]] = 0.9999
 
         countsPerCopyNum = N
 
         mutBurdens[m, :, :] = mutBurdens[m - 1, :, :]
-        @inbounds @simd for c in unique(S[m, :])
-          αp = sum(y[S[m, :] .== c])
-          βp = 1./sum(countsPerCopyNum[S[m, :] .== c])
+        @fastmath @inbounds @simd for c in unique(S[m, :])
+          idx = findin(S[m, :], c)
+          αp = sum(y[idx])
+          βp = 1./sum(countsPerCopyNum[idx])
           π[m, c] = minimum([rand(Gamma(αp, βp)), 0.999])
           mutBurdens[m, c, :] = π[m, c]
         end
@@ -100,22 +103,66 @@ function dpclustgibbs(y, N;
 
     dp = DPout(S, V, π, α)
 
-    DF, wts = getdensity(dp, iterations; burninstart = burninstart, bw = bw, maxx = maxx)
-    wtsout, clonefreq, allwts, allfreq = summariseoutput(dp, wts, iterations; burninstart = burninstart, cutoffweight = cutoffweight)
+    DF, wts =
+    getdensity(dp, iterations; burninstart = burninstart, bw = bw, maxx = maxx)
+    wtsout, clonefreq, allwts, allfreq =
+    summariseoutput(dp, wts, iterations; burninstart = burninstart, cutoffweight = cutoffweight)
 
     sortind = sortperm(clonefreq)
-    return DPresults(DF, wts, length(wtsout), wtsout[sortind], clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum))
+    return DPresults(DF, wts, length(wtsout), wtsout[sortind],
+    clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum)), PrS
+end
+
+function multinomsample!(S, PrS, nummuts, m, C)
+  @fastmath @inbounds @simd for k in 1:nummuts
+    S[m, k] = sum(rand(Multinomial(1, PrS[k, :])) .* collect(1:C))
+  end
+end
+
+function takemax!(PrS, k, C)
+  maxPrS = maximum(PrS[k, :])
+  @fastmath @inbounds @simd for i in 1:C
+    PrS[k, i] = PrS[k, i] - maxPrS
+  end
+end
+
+function exp!(PrS, k, C)
+  @fastmath @inbounds @simd for i in 1:C
+    PrS[k, i] = exp(PrS[k, i])
+  end
+end
+
+function normalize!(PrS, k, C)
+  sumPrS = sum(PrS[k, :])
+  @fastmath @inbounds @simd for i in 1:C
+    PrS[k, i] = PrS[k, i] / sumPrS
+  end
+end
+
+function updatestick!(V, S, α, C, m)
+  @fastmath @inbounds @simd for h in 1:(C-1)
+    V[m, h] = rand(Beta(1+sum(S[m, :] .== h), α[m - 1] + sum(S[m, :] .> h)))
+  end
 end
 
 function allocate(V, pi, obsy, obsN, currk, jvec)
 
-    out = zeros(length(jvec))
+    out = zeros(Float64, length(jvec))
 
-    @inbounds @simd for j in jvec
+    @fastmath @inbounds @simd for j in jvec
         out[j-1] = log.(V[j]) .+ sum(log.(1 .- V[1:(j-1)])) .+ obsy[currk] .*log.(pi[j]) .+ (obsN[currk] .- obsy[currk]) .* log.(1-pi[j])
     end
 
     return out
+end
+
+function allocate!(PrS, V, mutburdens, obsy, obsN, k, C, m)
+    @fastmath @inbounds @simd for j in 2:C
+        PrS[k, j-1] = log(V[m-1, j]) +
+        sum(log.(1 .- view(V, m-1, 1:(j-1)))) +
+        obsy[k] * log(mutburdens[m-1, j, k]) +
+        (obsN[k] - obsy[k]) * log(1-mutburdens[m-1, j, k])
+    end
 end
 
 function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxx = 0.5)
@@ -126,7 +173,6 @@ function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxx = 0.5)
 
     for i in 3:size(wts)[2]
         wts[:, i] = dp.V[:, i] .* prod((1 .- dp.V[:, (1:i .- 1)]), 2)
-
     end
 
     postints = zeros(512, iterations -  burninstart + 1)
