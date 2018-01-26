@@ -16,7 +16,7 @@ Perform dirichlet clustering on the variant allele frequency distribution of can
 ...
 """
 function dpclustgibbs(y, N;
-    iterations = 1000,
+    iterations = 10000,
     C = 30, #max number of clusters
     burninstart = round(Int64, iterations/2),
     bw = 0.01, # bandwidth of density estimation
@@ -110,7 +110,7 @@ function dpclustgibbs(y, N;
 
     sortind = sortperm(clonefreq)
     return DPresults(DF, wts, length(wtsout), wtsout[sortind],
-    clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum)), PrS
+    clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum))
 end
 
 function multinomsample!(S, PrS, nummuts, m, C)
@@ -158,7 +158,7 @@ end
 
 function allocate!(PrS, V, mutburdens, obsy, obsN, k, C, m)
     @fastmath @inbounds @simd for j in 2:C
-        PrS[k, j-1] = log(V[m-1, j]) +
+        PrS[k, j] = log(V[m-1, j]) +
         sum(log.(1 .- view(V, m-1, 1:(j-1)))) +
         obsy[k] * log(mutburdens[m-1, j, k]) +
         (obsN[k] - obsy[k]) * log(1-mutburdens[m-1, j, k])

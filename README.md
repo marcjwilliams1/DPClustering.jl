@@ -3,15 +3,11 @@
 Perform Dirichlet clustering on Varaint Allele Frequncies (VAFs) from sequencing data of cancers a la Nik-Zainal et al.
 
 ## Getting started
-Package is written in the [Julia](https://julialang.org/) programming language, and has been tested with julia v0.5.1.
+Package is written in the [Julia](https://julialang.org/) programming language.
 
 To download this package use the ```Pkg.clone``` function as below, which will download the package and install all the dependencies.
 ```
 Pkg.clone("https://github.com/marcjwilliams1/DPclustering.jl")
-```
-To correctly calculate the probability density requires a weighted kernel density estimator which is only available in the latest version of ```KernelDensity.jl```. To update the version to the latest one use the following command once you have cloned the ```DPclustering``` package.
-```
-Pkg.checkout("KernelDensity")
 ```
 
 ## Clustering
@@ -42,6 +38,8 @@ draw(PNG("example/example.png", 15cm, 10cm), myplot)
 
 ![plot](/example/example.png)
 
+## Speed
+Due to Julia's just in time compilation the sampling is fast. For example, the analysis above (600 mutations) for 10,000 iterations/samples the time taken should be on the order of 2-3 minutes on a reasonably specced laptop.
 
 ## Acknowledgments
 The model used in the Gibbs sampler is as described in Nik-Zainal et al. Bugs code provided in the supplementary information of this publication was taken as inspiration, as was code available from the Peter van Loo and David Wedge groups (eg: https://github.com/Wedge-Oxford/dpclust_docker).
