@@ -8,7 +8,7 @@ Perform dirichlet clustering on the variant allele frequency distribution of can
 - `C = 30`: Max number of clusters to consider
 - `burninstart = round(Int64, iterations/2)`: Burn in of the gibbs samples
 - `bw = 0.01`: Bandwidth of density estimation
-- `maxx = 0.7`:
+- `maxxaxis = 0.7`:
 - `cutoffweight = 0.05`: Minimum weight to be called a cluster
 - `verbose = true`: Show progress of gibbs sampling with `ProgressMeter` package
 - `A = 0.01`: Hyperparameter for α, see Nik-Zainal et al
@@ -20,7 +20,7 @@ function dpclustgibbs(y, N;
     C = 30, #max number of clusters
     burninstart = round(Int64, iterations/2),
     bw = 0.01, # bandwidth of density estimation
-    maxx = 0.7,
+    maxxaxis = 0.7,
     cutoffweight = 0.05, #minimum weight to be called a cluster
     verbose = true,
     A = 0.01, # Hyperparameters for alpha
@@ -104,7 +104,7 @@ function dpclustgibbs(y, N;
     dp = DPout(S, V, π, α)
 
     DF, wts =
-    getdensity(dp, iterations; burninstart = burninstart, bw = bw, maxx = maxx)
+    getdensity(dp, iterations; burninstart = burninstart, bw = bw, maxxaxis = maxxaxis)
     wtsout, clonefreq, allwts, allfreq =
     summariseoutput(dp, wts, iterations; burninstart = burninstart, cutoffweight = cutoffweight)
 
@@ -145,17 +145,6 @@ function updatestick!(V, S, α, C, m)
   end
 end
 
-function allocate(V, pi, obsy, obsN, currk, jvec)
-
-    out = zeros(Float64, length(jvec))
-
-    @fastmath @inbounds @simd for j in jvec
-        out[j-1] = log.(V[j]) .+ sum(log.(1 .- V[1:(j-1)])) .+ obsy[currk] .*log.(pi[j]) .+ (obsN[currk] .- obsy[currk]) .* log.(1-pi[j])
-    end
-
-    return out
-end
-
 function allocate!(PrS, V, mutburdens, obsy, obsN, k, C, m)
     @fastmath @inbounds @simd for j in 2:C
         PrS[k, j] = log(V[m-1, j]) +
@@ -165,7 +154,7 @@ function allocate!(PrS, V, mutburdens, obsy, obsN, k, C, m)
     end
 end
 
-function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxx = 0.5)
+function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxxaxis = 0.5)
 
     wts = zeros( size(dp.V)[1], size(dp.V)[2]);
     wts[:, 1] = dp.V[:, 1]
@@ -177,12 +166,13 @@ function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxx = 0.5)
 
     postints = zeros(512, iterations -  burninstart + 1)
 
-    xx = kde(dp.π[burninstart - 1, :], weights = wts[burninstart, :]./(sum(wts[burninstart, :])),
-                npoints = 512, boundary = (0, maxx), bandwidth = bw).x
+    xx = kde(dp.π[burninstart - 1, :],
+    weights = wts[burninstart, :]./(sum(wts[burninstart, :])),
+                npoints = 512, boundary = (0, maxxaxis), bandwidth = bw).x
 
     for i in burninstart:iterations
         postints[:, i - burninstart + 1] = kde(dp.π[i - 1, :], weights = wts[i, :]./(sum(wts[i, :])),
-        npoints = 512, boundary = (0, maxx), bandwidth = bw).density
+        npoints = 512, boundary = (0, maxxaxis), bandwidth = bw).density
     end
 
     meanv = mean(postints, 2)[:]
