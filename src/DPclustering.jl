@@ -1,7 +1,7 @@
 module DPclustering
 
-# packagesusing Distributions
-using RCall
+# packages
+#using RCall
 using DataFrames
 using ProgressMeter
 using KernelDensity
