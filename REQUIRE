@@ -3,7 +3,6 @@ RCall
 DataFrames
 ProgressMeter
 KernelDensity
-CancerSeqSim
 Gadfly
 Distributions
 Colors
