@@ -1,1 +1,9 @@
 julia 0.5
+RCall
+DataFrames
+ProgressMeter
+KernelDensity
+CancerSeqSim
+Gadfly
+Distributions
+Colors
