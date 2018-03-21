@@ -12,7 +12,7 @@ Package is written in the [Julia](https://julialang.org/) programming language.
 
 To download this package use the ```Pkg.add``` function as below, which will download the package and install all the dependencies.
 ```
-Pkg.add("DPclustering.")
+Pkg.add("DPclustering")
 ```
 
 ## Clustering
