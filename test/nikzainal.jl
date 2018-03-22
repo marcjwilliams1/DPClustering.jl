@@ -1,4 +1,4 @@
-#Running DP clustering should find 4 or 5 clusters, the 3 highest frequency clusters are 
+#Running DP clustering should find 4 or 5 clusters, the 3 highest frequency clusters are
 freqs = [0.362204, 0.202305, 0.111506]
 
 srand(1)
@@ -10,3 +10,6 @@ N = data[1][:, 2]
 out = dpclustgibbs(y, N, iterations = 20000)
 
 @test isapprox(sort(out.clonefrequencies, rev = true)[1:3], [0.362204, 0.202305, 0.111506], atol = 0.01)
+
+#check no errors from plotting
+plotresults(out)
