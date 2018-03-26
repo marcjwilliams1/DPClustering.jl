@@ -2,6 +2,6 @@ julia 0.6
 DataFrames
 ProgressMeter
 KernelDensity
-Gadfly
+Plots
 Distributions
 Colors

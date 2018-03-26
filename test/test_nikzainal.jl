@@ -7,7 +7,7 @@ data = readcsv("data.csv", header = true)
 y = data[1][:, 1]
 N = data[1][:, 2]
 
-@time out = dpclustgibbs(y, N, iterations = 20000)
+@time out = dpclustgibbs(y, N, iterations = 200)
 
 @test isapprox(sort(out.clonefrequencies, rev = true)[1:3], [0.362204, 0.202305, 0.111506], atol = 0.01)
 

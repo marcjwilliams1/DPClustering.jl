@@ -14,19 +14,17 @@ function plotresults(dp; save = false, dir = "", plotname = "DPclustering")
   DFres = dp.DF
   DF = dp.data.DF
 
-  l1 = layer(DFres, x = :x, y = :mean, ymin = :lq, ymax = :uq, Geom.line, Geom.ribbon,
-  Theme(default_color = RGBA(0.325, 0.525, 0.608),
-  lowlight_color=c->RGBA{Float32}(c.r, c.g, c.b, 0.5)))
-  l2 = layer(DF, x = :VAF, Geom.histogram(bincount=100, density = true),
-  Theme(default_color = RGBA(0.5, 0.5, 0.5, 0.8)))
-
-  myplot = plot(l1, l2,
-  Guide.xlabel("VAF"),
-  Guide.ylabel("Density"))
+  histogram(DF[:VAF], nbins = 100, normed = true, linecolor = :white,
+  color = RGBA(0.42, 0.5, 0.5, 0.6))
+  plot!(DFres[:x], DFres[:mean], color = RGBA(0.325, 0.525, 0.608))
+  plot!(DFres[:x], DFres[:uq], fillrange = DFres[:lq],
+               fillalpha = 0.5,
+               fillcolor = RGBA(0.325, 0.525, 0.608), linecolor = false,
+               markerstrokecolor=:white, titlefont = font(12, "Calibri"), ytickfont = font(10, "Calibri"), xtickfont = font(10, "Calibri"), legend = false, grid = false,
+               yaxis = ("Density"), xaxis = ("VAF"))
 
   if save == true
-      Gadfly.draw(PDF(joinpath(dir, "$(plotname).pdf"), 4inch, 3inch), myplot)
+      Plots.savefig(joinpath(dir, "$(plotname).pdf"))
   end
 
-  return myplot
 end

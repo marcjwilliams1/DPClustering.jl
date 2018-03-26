@@ -4,7 +4,7 @@ module DPclustering
 using DataFrames
 using ProgressMeter
 using KernelDensity
-using Gadfly
+using Plots
 using Distributions
 using Colors
 
