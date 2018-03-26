@@ -1,4 +1,4 @@
-function show(dp::DPresults)
+function show(io::IO, dp::DPresults)
     println("######################################")
     println("Number of clones: $(dp.nclones)")
     println("Frequency of clones: $(dp.clonefrequencies)")

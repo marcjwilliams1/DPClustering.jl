@@ -29,32 +29,23 @@ function dpclustgibbs(y, N;
 
     sum(y .== 0) == 0 || error("Some mutations have VAF = 0.0, make sure these mutations are removed before clustering")
 
-    totalCopyNumber = ones(length(y))
-    normalCopyNumber = 2 * ones(length(y))
-
     nummuts = length(y)
 
     # Set up arrays and matrices for recording samples
+    y = map(Float64, y) # make sure read counts and depth are floats
+    N = map(Float64, N)
+    VAF = y ./ N
     π = zeros(Float64, iterations, C)
-    V = ones(Float64, iterations, C)
-    S = zeros(Int64, iterations, nummuts)
     PrS = zeros(Float64, nummuts, C)
     α = zeros(Float64, iterations)
-    mutBurdens = zeros(Float64, iterations, C, nummuts)
+    mutburdens = zeros(Float64, iterations, C, nummuts)
+    V = ones(Float64, iterations, C)
+    clusterassignment = zeros(Int64, iterations, nummuts)
 
-    mutCopyNum = y ./ N
-    y = map(Float64, y)
-    N = map(Float64, N)
-
-    lower = minimum(mutCopyNum)
-    upper = maximum(mutCopyNum)
-    difference = upper - lower
-    lower = maximum([0.0001, lower - difference/10])
-    upper = minimum([upper + difference/10, 0.999])
-    # randomise starting positions of clusters
-    π[1, :] = rand(Uniform(lower, upper), C)
+    #random initial clusters between 0 and 1
+    π[1, :] = rand(Uniform(0.0, 1.0), C)
     for c in 1:C
-        mutBurdens[1, c, :] = π[1, c]
+        mutburdens[1, c, :] = π[1, c]
     end
 
     α[1] = 1.0
@@ -67,30 +58,30 @@ function dpclustgibbs(y, N;
     for m in 2:iterations
         for k in 1:nummuts
             #Binomial log-likelihood
-            PrS[k, 1] = log.(V[m .- 1, 1]) .+ (y[k] .* log.(mutBurdens[m-1, 1, k])) .+
-            (N[k] .- y[k]) .* log.(1 .- mutBurdens[m - 1, 1, k])
-            allocate!(PrS, V, mutBurdens, y, N, k, C, m)
+            PrS[k, 1] = log.(V[m .- 1, 1]) .+ (y[k] .* log.(mutburdens[m-1, 1, k])) .+
+            (N[k] .- y[k]) .* log.(1 .- mutburdens[m - 1, 1, k])
+            allocate!(PrS, V, mutburdens, y, N, k, C, m)
             takemax!(PrS, k, C)
             exp!(PrS, k, C)
             normalize!(PrS, k, C)
         end
 
-        multinomsample!(S, PrS, nummuts, m, C)
+        multinomsample!(clusterassignment, PrS, nummuts, m, C)
 
         # Update stick-breaking weights
-        updatestick!(V, S, α, C, m)
+        updatestick!(V, clusterassignment, α, C, m)
 
         V[m, [V[m, 1:(C-1)] .== 1.0; false]] = 0.9999
 
         countsPerCopyNum = N
 
-        mutBurdens[m, :, :] = mutBurdens[m - 1, :, :]
-        @fastmath @inbounds @simd for c in unique(S[m, :])
-          idx = findin(S[m, :], c)
+        mutburdens[m, :, :] = mutburdens[m - 1, :, :]
+        @fastmath @inbounds @simd for c in unique(clusterassignment[m, :])
+          idx = findin(clusterassignment[m, :], c)
           αp = sum(y[idx])
           βp = 1./sum(countsPerCopyNum[idx])
           π[m, c] = minimum([rand(Gamma(αp, βp)), 0.999])
-          mutBurdens[m, c, :] = π[m, c]
+          mutburdens[m, c, :] = π[m, c]
         end
 
         α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log.(1-V[m, 1:(C-1)])))))
@@ -101,7 +92,7 @@ function dpclustgibbs(y, N;
 
     end
 
-    dp = DPout(S, V, π, α)
+    dp = DPout(clusterassignment, V, π, α)
 
     DF, wts =
     getdensity(dp, iterations; burninstart = burninstart, bw = bw, maxxaxis = maxxaxis)
@@ -110,12 +101,12 @@ function dpclustgibbs(y, N;
 
     sortind = sortperm(clonefreq)
     return DPresults(DF, wts, length(wtsout), wtsout[sortind],
-    clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, mutCopyNum))
+    clonefreq[sortind], allwts, allfreq, dp, TargetData(y, N, VAF));
 end
 
-function multinomsample!(S, PrS, nummuts, m, C)
+function multinomsample!(clusterassignment, PrS, nummuts, m, C)
   @fastmath @inbounds @simd for k in 1:nummuts
-    S[m, k] = sum(rand(Multinomial(1, PrS[k, :])) .* collect(1:C))
+    clusterassignment[m, k] = sum(rand(Multinomial(1, PrS[k, :])) .* collect(1:C))
   end
 end
 
@@ -139,9 +130,9 @@ function normalize!(PrS, k, C)
   end
 end
 
-function updatestick!(V, S, α, C, m)
+function updatestick!(V, clusterassignment, α, C, m)
   @fastmath @inbounds @simd for h in 1:(C-1)
-    V[m, h] = rand(Beta(1+sum(S[m, :] .== h), α[m - 1] + sum(S[m, :] .> h)))
+    V[m, h] = rand(Beta(1+sum(clusterassignment[m, :] .== h), α[m - 1] + sum(clusterassignment[m, :] .> h)))
   end
 end
 

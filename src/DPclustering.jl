@@ -16,8 +16,8 @@ plotresults,
 show
 
 include("types.jl")
-include("clustering.jl")
 include("plotting.jl")
 include("util.jl")
+include("clustering.jl")
 
 end # module
