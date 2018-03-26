@@ -25,7 +25,7 @@ function plotresults(dp; save = false, dir = "", plotname = "DPclustering")
   Guide.ylabel("Density"))
 
   if save == true
-      Gadfly.draw(PNG(joinpath(dir, "$(plotname).pdf"), 4inch, 3inch), myplot)
+      Gadfly.draw(PDF(joinpath(dir, "$(plotname).pdf"), 4inch, 3inch), myplot)
   end
 
   return myplot
