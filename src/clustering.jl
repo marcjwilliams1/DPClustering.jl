@@ -16,9 +16,9 @@ Perform dirichlet clustering on the variant allele frequency distribution of can
 ...
 """
 function dpclustgibbs(y, N;
-    iterations = 10000,
+    iterations = 20000,
     C = 30, #max number of clusters
-    burninstart = round(Int64, iterations/2),
+    burninstart = round(Int64, 5000),
     bw = 0.01, # bandwidth of density estimation
     maxxaxis = 0.7,
     cutoffweight = 0.05, #minimum weight to be called a cluster
@@ -43,7 +43,7 @@ function dpclustgibbs(y, N;
     clusterassignment = zeros(Int64, iterations, nummuts)
 
     #random initial clusters between 0 and 1
-    π[1, :] = rand(Uniform(0.0, 1.0), C)
+    π[1, :] = rand(Uniform(0.0, maximum(VAF)), C)
     for c in 1:C
         mutburdens[1, c, :] = π[1, c]
     end
