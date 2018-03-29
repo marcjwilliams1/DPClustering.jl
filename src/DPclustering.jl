@@ -10,7 +10,7 @@ using Colors
 
 import Base.show
 
-export dpclustgibbs,
+export dpclustering,
 DPresults,
 plotresults,
 show

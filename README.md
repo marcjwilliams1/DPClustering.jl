@@ -45,4 +45,4 @@ myplot = plotresults(out, save = true)
 Due to Julia's just in time compilation the sampling is relatively fast. For example, the analysis above (600 mutations) the time taken to generate 10,000 iterations/samples should be on the order of 2-3 minutes on a reasonably specced laptop.
 
 ## Acknowledgments
-The model used in the Gibbs sampler is as described in Nik-Zainal et al. Bugs code provided in the supplementary information of this publication was taken as inspiration, as was code available from the Peter van Loo and David Wedge groups (eg: https://github.com/Wedge-Oxford/dpclust_docker).
+The model used in the Gibbs sampler is as described in Nik-Zainal et al. Bugs code provided in the supplementary information of this publication was taken as inspiration, as was code available from David Wedge's group (https://github.com/Wedge-Oxford/dpclust_docker).

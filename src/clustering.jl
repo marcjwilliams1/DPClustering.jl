@@ -1,5 +1,5 @@
 """
-    dpclustgibbs(y::Array{Real, 1}, N::Array{Real, 1}; <keyword arguments>)
+    dpclustering(y::Array{Real, 1}, N::Array{Real, 1}; <keyword arguments>)
 Perform dirichlet clustering on the variant allele frequency distribution of cancer sequencing data and find the number of clusters that the data supports, y is a vector of the number of reads reporting each mutant, N is the total depth at each locus.
 
 ...
@@ -15,7 +15,7 @@ Perform dirichlet clustering on the variant allele frequency distribution of can
 - `B = 0.01`: Hyperparameter for α, see Nik-Zainal et al
 ...
 """
-function dpclustgibbs(y, N;
+function dpclustering(y, N;
     iterations = 20000,
     C = 30, #max number of clusters
     burninstart = round(Int64, 5000),
