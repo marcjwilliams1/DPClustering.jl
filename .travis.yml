@@ -30,9 +30,9 @@ matrix:
 ## uncomment the following lines to override the default test script
 #script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("DPclustering"); Pkg.test("DPclustering"; coverage=true)'
+  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("DPclustering"); Pkg.test("DPClustering"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("DPclustering")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  - julia -e 'cd(Pkg.dir("DPClustering")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("DPclustering")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'cd(Pkg.dir("DPClustering")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'

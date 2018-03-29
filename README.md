@@ -1,9 +1,9 @@
-# DPclustering
+# DPClustering
 
-[![Build Status](https://travis-ci.org/marcjwilliams1/DPclustering.jl.svg?branch=master)](https://travis-ci.org/marcjwilliams1/DPclustering.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/marcjwilliams1/DPclustering.jl?branch=master&svg=true)](https://ci.appveyor.com/project/marcjwilliams1/DPclustering-jl/branch/master)
-[![Coverage Status](https://coveralls.io/repos/github/marcjwilliams1/DPclustering.jl/badge.svg?branch=master)](https://coveralls.io/github/marcjwilliams1/DPclustering.jl?branch=master)
-[![codecov.io](http://codecov.io/github/marcjwilliams1/DPclustering.jl/coverage.svg?branch=master)](http://codecov.io/github/marcjwilliams1/DPclustering.jl?branch=master)
+[![Build Status](https://travis-ci.org/marcjwilliams1/DPClustering.jl.svg?branch=master)](https://travis-ci.org/marcjwilliams1/DPclustering.jl)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/marcjwilliams1/DPClustering.jl?branch=master&svg=true)](https://ci.appveyor.com/project/marcjwilliams1/DPclustering-jl/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/marcjwilliams1/DPClustering.jl/badge.svg?branch=master)](https://coveralls.io/github/marcjwilliams1/DPclustering.jl?branch=master)
+[![codecov.io](http://codecov.io/github/marcjwilliams1/DPClustering.jl/coverage.svg?branch=master)](http://codecov.io/github/marcjwilliams1/DPclustering.jl?branch=master)
 
 Perform Dirichlet clustering on Varaint Allele Frequncies (VAFs) from sequencing data of cancers a la Nik-Zainal et al.
 
@@ -12,7 +12,7 @@ Package is written in the [Julia](https://julialang.org/) programming language.
 
 To download this package use the ```Pkg.add``` function as below, which will download the package and install all the dependencies.
 ```
-Pkg.add("DPclustering")
+Pkg.add("DPClustering")
 ```
 
 ## Clustering
@@ -29,8 +29,7 @@ At the moment, clustering will only work with single samples and mutations in co
 ## Example
 There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. We'll use the Gadfly package to save a plot.
 ```
-using DPclustering
-using Gadfly
+using DPClustering
 data = readcsv("example/data.csv", header = true)
 y = data[1][:, 1]
 N = data[1][:, 2]

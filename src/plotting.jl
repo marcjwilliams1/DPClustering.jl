@@ -1,7 +1,7 @@
 """
     plotresults(dp; <keyword arguments>)
 
-Plot results from DPclustering object. Will plot histogram of raw data with density estimates from Gibbs sampling.
+Plot results from DPClustering object. Will plot histogram of raw data with density estimates from Gibbs sampling.
 ...
 ## Arguments
 - `save = false`: Set to `true` if you want the plot to be saved
@@ -9,7 +9,7 @@ Plot results from DPclustering object. Will plot histogram of raw data with dens
 - `plotname = "DPclustering"`: Name to call plot when saving.
 ...
 """
-function plotresults(dp; save = false, dir = "", plotname = "DPclustering")
+function plotresults(dp; save = false, dir = "", plotname = "DPClustering")
 
   DFres = dp.DF
   DF = dp.data.DF

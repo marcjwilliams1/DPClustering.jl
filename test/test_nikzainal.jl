@@ -13,8 +13,8 @@ N = data[1][:, 2]
 
 #check no errors from plotting
 plotresults(out; save = true)
-@test isfile("DPclustering.pdf")
-rm("DPclustering.pdf")
+@test isfile("DPClustering.pdf")
+rm("DPClustering.pdf")
 
 #check show function works
 show(out)

@@ -1,4 +1,4 @@
-using DPclustering
+using DPClustering
 using Base.Test
 
 tests = ["nikzainal"]
