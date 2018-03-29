@@ -1,4 +1,4 @@
-module DPclustering
+module DPClustering
 
 # packages
 using DataFrames
