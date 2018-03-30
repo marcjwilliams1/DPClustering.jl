@@ -11,14 +11,14 @@ Perform Dirichlet clustering on Varaint Allele Frequncies (VAFs) from sequencing
 Package is written in the [Julia](https://julialang.org/) programming language.
 
 To download this package use the ```Pkg.add``` function as below, which will download the package and install all the dependencies.
-```
+```julia
 Pkg.add("DPClustering")
 ```
 
 ## Clustering
 Clustering is invoked using the ```dpclustering``` function which takes 2 vectors of equal size: y - the number of reads reporting the mutation and N - the depth of coverage at that locus. With these, clustering can be performed and the function will return a ```DPresults``` type. There are a number of optional arguments which are all set to reasonable defaults, you may want to change the number of iterations or set verbose to false. the default is to show a log of the time taken in the gibbs sampler. To see the optional arguments and their defaults use ```?dpclustgibbs``` in the julia repl.
 
-```
+```julia
 dp = dpclustering(y, N, iterations = 10000, verbose = false);
 ```
 
@@ -28,7 +28,7 @@ At the moment, clustering will only work with single samples and mutations in co
 
 ## Example
 There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. We'll use the Gadfly package to save a plot.
-```
+```julia
 using DPClustering
 data = readcsv("example/data.csv", header = true)
 y = data[1][:, 1]
