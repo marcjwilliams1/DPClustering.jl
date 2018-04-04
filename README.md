@@ -22,12 +22,12 @@ Clustering is invoked using the ```dpclustering``` function which takes 2 vector
 dp = dpclustering(y, N, iterations = 10000, verbose = false);
 ```
 
-You can then summarise and plot the output using ```show(dp)``` and ```plotresults(dp)```.
+You can then plot the output using ```plotresults(dp)```.
 
 At the moment, clustering will only work with single samples and mutations in copy neutral regions. So the input mutations should either be filtered for copy number alterations or corrected for copy number before inputting.
 
 ## Example
-There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. We'll use the Gadfly package to save a plot.
+There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. There is a built in function to plot the data and associated clustering.
 ```julia
 using DPClustering
 data = readcsv("example/data.csv", header = true)
@@ -35,7 +35,6 @@ y = data[1][:, 1]
 N = data[1][:, 2]
 
 out = dpclustering(y, N)
-show(out)
 myplot = plotresults(out, save = true)
 ```
 
@@ -45,4 +44,4 @@ myplot = plotresults(out, save = true)
 Due to Julia's just in time compilation the sampling is relatively fast. For example, the analysis above (600 mutations) the time taken to generate 10,000 iterations/samples should be on the order of 2-3 minutes on a reasonably specced laptop.
 
 ## Acknowledgments
-The model used in the Gibbs sampler is as described in Nik-Zainal et al. Bugs code provided in the supplementary information of this publication was taken as inspiration, as was code available from David Wedge's group (https://github.com/Wedge-Oxford/dpclust_docker).
+The model used in the Gibbs sampler is as described in Nik-Zainal et al. Bugs code provided in the supplementary information of this publication and code available from David Wedge's group (https://github.com/Wedge-Oxford/dpclust_docker) were used in the development of the package.
