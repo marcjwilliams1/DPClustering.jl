@@ -1,11 +1,11 @@
-type DPout
+mutable struct DPout
     S
     V
     π
     α
 end
 
-type TargetData
+mutable struct TargetData
 
     y::Array{Int64, 1}
     N::Array{Int64, 1}
@@ -16,7 +16,7 @@ type TargetData
     new(y, N, VAF, DataFrame(y = y, N = N, VAF = VAF))
 end
 
-type DPresults
+mutable struct DPresults
     DF::DataFrame
     weights
     nclones

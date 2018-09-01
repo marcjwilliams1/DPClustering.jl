@@ -1,9 +1,9 @@
 #Running DP clustering should find 4 or 5 clusters, the 3 highest frequency clusters are
 freqs = [0.362204, 0.202305, 0.111506]
 
-srand(123)
+Random.seed!(123)
 
-data = readcsv("data.csv", header = true)
+data = readdlm("data.csv", header = true)
 y = data[1][:, 1]
 N = data[1][:, 2]
 

@@ -30,7 +30,7 @@ At the moment, clustering will only work with single samples and mutations in co
 There is some example data provided originally in Nik-Zainal et al in the examples folder. So an analysis would proceed as follows. There is a built in function to plot the data and associated clustering.
 ```julia
 using DPClustering
-data = readcsv("example/data.csv", header = true)
+data = readdlm("example/data.csv", header = true)
 y = data[1][:, 1]
 N = data[1][:, 2]
 
