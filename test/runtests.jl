@@ -1,5 +1,5 @@
 using DPClustering
-using Base.Test
+using Test
 
 tests = ["nikzainal"]
 
