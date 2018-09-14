@@ -76,15 +76,20 @@ function dpclustering(y, N;
         countsPerCopyNum = N
 
         mutburdens[m, :, :] = mutburdens[m - 1, :, :]
-        @fastmath @inbounds @simd for c in unique(clusterassignment[m, :])
+        @fastmath @inbounds for c in unique(clusterassignment[m, :])
           idx = findall((in)(c), clusterassignment[m, :])
           αp = sum(y[idx])
           βp = 1 ./ sum(countsPerCopyNum[idx])
           π[m, c] = minimum([rand(Gamma(αp, βp)), 0.999])
           mutburdens[m, c, :] .= π[m, c]
         end
+        x1 = C .+ A .- 1
 
-        α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log.(1-V[m, 1:(C-1)])))))
+        x2 = sum(log.(1 .- V[m, 1:(C.-1)]))
+        x3 = B .- x2
+
+        α[m] = rand(Gamma(C .+ A .- 1, 1/(B .- sum(log.(1 .- V[m, 1:(C.-1)])))))
+        #α[m] = rand(Gamma(x1, x3))
 
         if verbose == true
           next!(p)
@@ -105,39 +110,39 @@ function dpclustering(y, N;
 end
 
 function multinomsample!(clusterassignment, PrS, nummuts, m, C)
-  @fastmath @inbounds @simd for k in 1:nummuts
+  @fastmath @inbounds for k in 1:nummuts
     clusterassignment[m, k] = sum(rand(Multinomial(1, PrS[k, :])) .* collect(1:C))
   end
 end
 
 function takemax!(PrS, k, C)
   maxPrS = maximum(PrS[k, :])
-  @fastmath @inbounds @simd for i in 1:C
+  @fastmath @inbounds for i in 1:C
     PrS[k, i] = PrS[k, i] - maxPrS
   end
 end
 
 function exp!(PrS, k, C)
-  @fastmath @inbounds @simd for i in 1:C
-    PrS[k, i] .= exp(PrS[k, i])
+  @fastmath @inbounds for i in 1:C
+    PrS[k, i] = exp(PrS[k, i])
   end
 end
 
 function normalize!(PrS, k, C)
   sumPrS = sum(PrS[k, :])
-  @fastmath @inbounds @simd for i in 1:C
+  @fastmath @inbounds for i in 1:C
     PrS[k, i] = PrS[k, i] / sumPrS
   end
 end
 
 function updatestick!(V, clusterassignment, α, C, m)
-  @fastmath @inbounds @simd for h in 1:(C-1)
+  @fastmath @inbounds for h in 1:(C-1)
     V[m, h] = rand(Beta(1+sum(clusterassignment[m, :] .== h), α[m - 1] + sum(clusterassignment[m, :] .> h)))
   end
 end
 
 function allocate!(PrS, V, mutburdens, obsy, obsN, k, C, m)
-    @fastmath @inbounds @simd for j in 2:C
+    @fastmath @inbounds for j in 2:C
         PrS[k, j] = log(V[m-1, j]) +
         sum(log.(1 .- view(V, m-1, 1:(j-1)))) +
         obsy[k] * log(mutburdens[m-1, j, k]) +
@@ -152,7 +157,7 @@ function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxxaxis = 0.5)
     wts[:, 2] = dp.V[:, 2] .* (1 .- dp.V[:, 1])
 
     for i in 3:size(wts)[2]
-        wts[:, i] = dp.V[:, i] .* prod((1 .- dp.V[:, (1:i .- 1)]), 2)
+        wts[:, i] = dp.V[:, i] .* prod((1 .- dp.V[:, (1:i .- 1)]), dims = 2)
     end
 
     postints = zeros(512, iterations -  burninstart + 1)
