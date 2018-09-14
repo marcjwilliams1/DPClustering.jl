@@ -45,11 +45,11 @@ function dpclustering(y, N;
     #random initial clusters between 0 and 1
     π[1, :] = rand(Uniform(0.0, maximum(VAF)), C)
     for c in 1:C
-        mutburdens[1, c, :] = π[1, c]
+        mutburdens[1, c, :] .= π[1, c]
     end
 
     α[1] = 1.0
-    V[1, 1:(C - 1)] = 0.5
+    V[1, 1:(C - 1)] .= 0.5
 
     if verbose == true
       p = Progress(iterations, 1, "Gibbs sampling progress: ", 30)
@@ -71,17 +71,17 @@ function dpclustering(y, N;
         # Update stick-breaking weights
         updatestick!(V, clusterassignment, α, C, m)
 
-        V[m, [V[m, 1:(C-1)] .== 1.0; false]] = 0.9999
+        V[m, [V[m, 1:(C-1)] .== 1.0; false]] .= 0.9999
 
         countsPerCopyNum = N
 
         mutburdens[m, :, :] = mutburdens[m - 1, :, :]
         @fastmath @inbounds @simd for c in unique(clusterassignment[m, :])
-          idx = findin(clusterassignment[m, :], c)
+          idx = findall((in)(c), clusterassignment[m, :])
           αp = sum(y[idx])
-          βp = 1./sum(countsPerCopyNum[idx])
+          βp = 1 ./ sum(countsPerCopyNum[idx])
           π[m, c] = minimum([rand(Gamma(αp, βp)), 0.999])
-          mutburdens[m, c, :] = π[m, c]
+          mutburdens[m, c, :] .= π[m, c]
         end
 
         α[m] = rand(Gamma(C + A - 1, 1/(B - sum(log.(1-V[m, 1:(C-1)])))))
@@ -119,7 +119,7 @@ end
 
 function exp!(PrS, k, C)
   @fastmath @inbounds @simd for i in 1:C
-    PrS[k, i] = exp(PrS[k, i])
+    PrS[k, i] .= exp(PrS[k, i])
   end
 end
 
@@ -166,9 +166,9 @@ function getdensity(dp, iterations; burninstart = 500, bw = 1.0, maxxaxis = 0.5)
         npoints = 512, boundary = (0, maxxaxis), bandwidth = bw).density
     end
 
-    meanv = mean(postints, 2)[:]
-    lq = mapslices(x -> quantile(x, 0.025), postints, 2)[:]
-    uq = mapslices(x -> quantile(x, 0.975), postints, 2)[:]
+    meanv = mean(postints, dims = 2)[:]
+    lq = mapslices(x -> quantile(x, 0.025), postints, dims = 2)[:]
+    uq = mapslices(x -> quantile(x, 0.975), postints, dims = 2)[:]
 
     DF = DataFrame(mean = meanv, lq = lq, uq = uq, x = collect(xx))
 
@@ -178,10 +178,10 @@ end
 function summariseoutput(dp, wts, iterations; burninstart = 1000, cutoffweight = 0.05)
 
     postwts = wts[burninstart:iterations, :]
-    meanwts = mean(postwts, 1)
+    meanwts = mean(postwts, dims = 1)
     clonewts = meanwts[meanwts.>cutoffweight]
 
-    clonefrequency = mean(dp.π[burninstart:iterations, :], 1)
+    clonefrequency = mean(dp.π[burninstart:iterations, :], dims = 1)
     largeclonefrequency = clonefrequency[meanwts.>cutoffweight]
 
     clonefrequency = clonefrequency[:]

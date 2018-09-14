@@ -3,7 +3,8 @@ freqs = [0.362204, 0.202305, 0.111506]
 
 srand(123)
 
-data = readcsv("data.csv", header = true)
+using DelimitedFiles
+data = readdlm("data.csv", ',', header = true)
 y = data[1][:, 1]
 N = data[1][:, 2]
 
